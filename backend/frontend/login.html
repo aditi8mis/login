@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmoHeal Register</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .form-container { background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { text-align: center; margin-bottom: 1.5rem; color: #333; }
+        input { width: 100%; padding: 12px; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        button { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; }
+        button:hover { background: #5a67d8; }
+        .error, .success { padding: 10px; margin-bottom: 1rem; border-radius: 5px; text-align: center; }
+        .error { background: #fed7d7; color: #c53030; }
+        .success { background: #c6f6d5; color: #38a169; }
+        .back-link { text-align: center; margin-top: 1rem; }
+        .back-link a { color: #667eea; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Sign In to EmoHeal</h2>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Username or Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <div id="message"></div>
+            <button type="submit">Login</button>
+        </form>
+        <div class="back-link"><a href="./guest.html">Back to Guest</a></div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = '';
+            try {
+                const res = await fetch('http://localhost:8000/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('access_token', data.access_token);
+                    msgDiv.innerHTML = '<div class="success">Logged in! Redirecting...</div>';
+                    setTimeout(() => window.location.href = './dashboard.html', 1500);  // Your main user page
+                } else {
+                    const data = await res.json();
+                    msgDiv.innerHTML = `<div class="error">${data.detail}</div>`;
+                }
+            } catch (err) {
+                msgDiv.innerHTML = '<div class="error">Network error.</div>';
+            }
+        });
+    </script>
+</body>
+</html>
