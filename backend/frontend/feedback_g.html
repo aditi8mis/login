@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Feedback</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<h2>User Feedback</h2>
+<div id="feedbackContainer"></div>
+
+
+<script>
+fetch('http://localhost:5000/api/feedback')
+.then(res => res.json())
+.then(data => {
+const container = document.getElementById('feedbackContainer');
+data.forEach(f =>
+const div = document.createElement('div');
+div.className = 'feedback-card';
+div.innerHTML = `<p>${f.message}</p>`;
+container.appendChild(div);
+});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EmoHeal Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- 🔝 NAVBAR -->
+<header class="navbar">
+  <div class="logo">EmoHeal</div>
+
+  <div class="nav-buttons">
+    <button onclick="goFeedback()">Feedback</button>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<!-- 👋 WELCOME -->
+<section class="welcome">
+  <h1>Welcome Back 👋</h1>
+  <p>Track your mood & mental health</p>
+</section>
+
+<!-- 🔘 TOP 3 OPTIONS -->
+<section class="cards">
+  <div class="card purple">
+    <h3>Facial Emotion</h3>
+    <p>Detect emotion using camera</p>
+    <button onclick="facialEmotion()">Start Camera</button>
+  </div>
+
+  <div class="card pink">
+    <h3>Voice Emotion</h3>
+    <p>Detect emotion using voice</p>
+    <button onclick="voiceEmotion()">Start Recording</button>
+  </div>
+
+  <div class="card blue">
+    <h3>AI Chatbot</h3>
+    <p>Talk with AI assistant</p>
+    <button onclick="startChat()">Start Chat</button>
+  </div>
+</section>
+
+<!-- 📅 CALENDAR SECTION -->
+<section class="calendar-section">
+  <h2 id="monthYear"></h2>
+
+  <div class="calendar">
+    <!-- Day Names -->
+    <div class="day-name">Sun</div>
+    <div class="day-name">Mon</div>
+    <div class="day-name">Tue</div>
+    <div class="day-name">Wed</div>
+    <div class="day-name">Thu</div>
+    <div class="day-name">Fri</div>
+    <div class="day-name">Sat</div>
+    <!-- Days injected by JS -->
+  </div>
+</section>
+
+<!-- 😊 TODAY MOOD -->
+<section class="today-mood">
+  <h3>Today's Mood</h3>
+  <div id="todayMoodDisplay">No mood logged yet</div>
+</section>
+
+<!-- 😀 EMOJI PICKER -->
+<section class="emoji-picker">
+  <span onclick="selectMood('😊')">😊</span>
+  <span onclick="selectMood('😐')">😐</span>
+  <span onclick="selectMood('😔')">😔</span>
+  <span onclick="selectMood('😡')">😡</span>
+  <span onclick="selectMood('😴')">😴</span>
+</section>
+
+<!-- JS -->
+<script src="script.js"></script>
+</body>
+</html>
