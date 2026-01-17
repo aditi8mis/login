@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EmoHeal | Voice Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #020024, #090979, #00d4ff);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .navbar {
+            width: 100%;
+            padding: 20px 40px;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #090979;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: #090979;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00d4ff, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status {
+            font-size: 18px;
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .mic-container {
+            margin: 40px 0;
+        }
+
+        .mic-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            font-size: 48px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .mic-btn.listening {
+            background: #ff4757;
+            box-shadow: 0 0 30px #ff4757;
+            animation: pulse 1s infinite;
+        }
+
+        .mic-btn.recording {
+            background: #ffa502;
+            box-shadow: 0 0 30px #ffa502;
+        }
+
+        .mic-btn.idle {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .mood-display {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            min-height: 120px;
+        }
+
+        .mood-emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .confidence {
+            background: rgba(0,212,255,0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .music-player {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+        }
+
+        .music-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+
+        audio {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logout-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">EmoHeal</div>
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back</button>
+    </div>
+
+    <div class="container">
+        <h1>Voice Mood Analysis</h1>
+        <div class="status" id="status">Click microphone to start speaking</div>
+
+        <div class="mic-container">
+            <button class="mic-btn idle" id="micBtn" onclick="toggleRecording()">🎤</button>
+            <div style="margin-top: 20px; font-size: 14px;">
+                Speak naturally for 5-10 seconds
+            </div>
+        </div>
+
+        <div class="mood-display" id="moodDisplay" style="display: none;">
+            <div class="mood-emoji" id="moodEmoji"></div>
+            <div id="moodLabel"></div>
+            <div class="confidence" id="confidence"></div>
+        </div>
+
+        <div class="music-player" id="musicPlayer" style="display: none;">
+            <div class="music-title" id="musicTitle">Recommended Music</div>
+            <audio id="musicPlayer" controls></audio>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8000";
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        // Music recommendations by mood
+        const musicByMood = {
+            'happy': { 
+                title: "Happy Vibes ✨", 
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
+            },
+            'sad': { 
+                title: "Calm Piano 🌙", 
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" 
+            },
+            'angry': { 
+                title: "Heavy Bass 🔥", 
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" 
+            },
+            'neutral': { 
+                title: "Chill LoFi ☕", 
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" 
+            },
+            'excited': { 
+                title: "Upbeat Pop 🎉", 
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" 
+            }
+        };
+
+        async function toggleRecording() {
+            const micBtn = document.getElementById('micBtn');
+            const status = document.getElementById('status');
+
+            if (!isRecording) {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = sendAudioToBackend;
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.className = 'mic-btn recording';
+                    micBtn.textContent = '⏹️';
+                    status.textContent = '🎙️ Recording... Speak naturally (5-10 seconds)';
+                    
+                    // Auto-stop after 10 seconds
+                    setTimeout(() => {
+                        if (isRecording) stopRecording();
+                    }, 10000);
+
+                } catch (err) {
+                    status.textContent = '❌ Microphone access denied';
+                    console.error('Mic error:', err);
+                }
+            } else {
+                stopRecording();
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+            }
+        }
+
+        async function sendAudioToBackend() {
+            const micBtn = document.getElementById('micBtn');
+            const status = document.getElementById('status');
+            
+            micBtn.className = 'mic-btn listening';
+            micBtn.textContent = '🔍';
+            status.textContent = '🔬 Analyzing voice...';
+
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'voice-recording.webm');
+
+            try {
+                const response = await fetch(`${API_BASE}/analyze-voice`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayMood(result.detected_emotion, result.confidence);
+                    playMusic(result.detected_emotion);
+                } else {
+                    status.textContent = `Error: ${result.detail || 'Analysis failed'}`;
+                }
+            } catch (error) {
+                status.textContent = '❌ Network error. Check backend.';
+                console.error('Backend error:', error);
+            }
+        }
+
+        function displayMood(mood, confidence) {
+            const moodDisplay = document.getElementById('moodDisplay');
+            const moodEmoji = document.getElementById('moodEmoji');
+            const moodLabel = document.getElementById('moodLabel');
+            const confidenceEl = document.getElementById('confidence');
+            const status = document.getElementById('status');
+
+            const moodMap = {
+                'happy': '😊 Happy',
+                'sad': '😢 Sad', 
+                'angry': '😠 Angry',
+                'neutral': '😐 Neutral',
+                'excited': '🤩 Excited',
+                'fearful': '😨 Fearful'
+            };
+
+            const emoji = moodMap[mood] ? moodMap[mood].split(' ')[0] : '🤔';
+            const label = moodMap[mood] || mood;
+
+            moodEmoji.textContent = emoji;
+            moodLabel.textContent = label;
+            confidenceEl.textContent = `Confidence: ${(confidence * 100).toFixed(1)}%`;
+            
+            moodDisplay.style.display = 'block';
+            status.textContent = '✅ Analysis complete!';
+        }
+
+        function playMusic(mood) {
+            const musicPlayer = document.getElementById('musicPlayer');
+            const musicTitle = document.getElementById('musicTitle');
+            
+            const music = musicByMood[mood] || musicByMood['neutral'];
+            musicTitle.textContent = music.title;
+            musicPlayer.src = music.url;
+            musicPlayer.style.display = 'block';
+            
+            // Auto-play music
+            musicPlayer.play().catch(e => {
+                console.log('Autoplay prevented:', e);
+            });
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Check mic permission on load
+        document.addEventListener('DOMContentLoaded', () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(() => {
+                    document.getElementById('status').textContent = '🎤 Ready! Click microphone to start';
+                })
+                .catch(() => {
+                    document.getElementById('status').textContent = '❌ Please allow microphone access';
+                });
+        });
+    </script>
+</body>
+</html>
