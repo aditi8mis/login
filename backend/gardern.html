@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EmoHeal - Mental Wellness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- 🎨 COLOR PALETTE & ANIMATIONS --- */
+    :root {
+      --primary: #6c5ce7;
+      --glass: rgba(255, 255, 255, 0.85);
+      --glass-hover: rgba(255, 255, 255, 0.95);
+      --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #2d3436;
+      /* Animated Aurora Background */
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* --- 🔝 NAVBAR --- */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 3rem;
+      background: var(--glass);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { 
+      font-weight: 800; 
+      font-size: 1.8rem; 
+      color: var(--primary); 
+      display: flex; 
+      align-items: center; 
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .nav-buttons button {
+      padding: 0.6rem 1.5rem;
+      border: none;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      font-weight: 600;
+      color: #555;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+      margin-left: 10px;
+    }
+    .nav-buttons button:hover {
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .nav-buttons .logout { color: #e17055; }
+
+    /* --- 🌿 SOUL GARDEN (The Hero) --- */
+    .garden-section {
+      text-align: center;
+      padding: 3rem 1rem 4rem 1rem;
+      /* No background color here so it blends with the body gradient */
+    }
+    
+    .garden-wrapper {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 40px;
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .garden-wrapper h1 {
+      margin: 0;
+      background: -webkit-linear-gradient(45deg, #6c5ce7, #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2.8rem;
+    }
+
+    /* THE MAGIC TRICK: Merging the Image */
+    .garden-display-area {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 1rem auto;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 70%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .tree-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      /* THIS LINE blends the white background of the image to transparent */
+      mix-blend-mode: multiply; 
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .blooming {
+      animation: float 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 15px rgba(253, 203, 110, 0.6));
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .health-bar-track {
+      background: rgba(0,0,0,0.05);
+      height: 20px;
+      width: 80%;
+      margin: 0 auto;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .health-bar-fill {
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(90deg, #ff7675, #fdcb6e, #00b894);
+      border-radius: 20px;
+      transition: width 1s ease;
+    }
+    
+    .dynamic-hint {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: #2d3436;
+      background: white;
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    /* --- 🔘 ACTION CARDS (Aligned!) --- */
+    .dashboard-container {
+      max-width: 1200px;
+      margin: -3rem auto 3rem auto; /* Overlap nicely */
+      padding: 0 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .cards-grid {
+      display: grid;
+      /* FORCED SINGLE LINE: 4 Equal Columns */
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 2rem 1rem;
+      text-align: center;
+      transition: all 0.4s ease;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 300px; /* Fixed height for uniformity */
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.02);
+      background: var(--glass-hover);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border-color: white;
+    }
+
+    .icon-wrapper {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 1rem auto;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      background: white;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .card h3 { margin: 0.5rem 0; font-size: 1.4rem; }
+    .card p { font-size: 0.95rem; opacity: 0.7; margin-bottom: 1.5rem; }
+
+    .btn-action {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.2s;
+    }
+    .btn-action:hover { transform: scale(1.05); }
+
+    /* Specific Colors */
+    .c-purple .icon-wrapper { color: #6c5ce7; }
+    .c-purple .btn-action { background: linear-gradient(135deg, #6c5ce7, #a29bfe); box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4); }
+
+    .c-pink .icon-wrapper { color: #e84393; }
+    .c-pink .btn-action { background: linear-gradient(135deg, #e84393, #ff7675); box-shadow: 0 4px 15px rgba(232, 67, 147, 0.4); }
+
+    .c-blue .icon-wrapper { color: #0984e3; }
+    .c-blue .btn-action { background: linear-gradient(135deg, #0984e3, #74b9ff); box-shadow: 0 4px 15px rgba(9, 132, 227, 0.4); }
+
+    .c-green .icon-wrapper { color: #00b894; }
+    .c-green .btn-action { background: linear-gradient(135deg, #00b894, #55efc4); box-shadow: 0 4px 15px rgba(0, 184, 148, 0.4); }
+
+    /* Responsive for small mobile screens (optional safety) */
+    @media (max-width: 768px) {
+      .cards-grid { grid-template-columns: 1fr; } /* Stack on phones */
+    }
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo">EmoHeal</div>
+  <div class="nav-buttons">
+    <button onclick="alert('Feedback')">Feedback</button>
+    <button class="logout" onclick="alert('Out')">Logout</button>
+  </div>
+</header>
+
+<section class="garden-section">
+  <div class="garden-wrapper">
+    <h1>Your Soul Garden</h1>
+    
+    <div class="garden-display-area">
+      <img id="treeImage" class="tree-image" src="tree-neutral1.png" alt="Tree">
+    </div>
+
+    <h2 id="gardenStatus" style="margin-bottom: 0.5rem; color: #444;">Status: Stable 🌱</h2>
+    
+    <div class="health-bar-track">
+      <div id="healthFill" class="health-bar-fill"></div>
+    </div>
+
+    <div class="dynamic-hint" id="randomHint">
+      Hint: Loading insight...
+    </div>
+  </div>
+</section>
+
+<div class="dashboard-container">
+  <div class="cards-grid">
+    
+    <div class="card c-purple">
+      <div>
+        <div class="icon-wrapper">📸</div>
+        <h3>Facial Scan</h3>
+        <p>Analyze emotions via webcam.</p>
+      </div>
+      <a href="http://127.0.0.1:5500/backend/frontend/facial-analysis.html" target="_blank">
+        <button class="btn-action">Start Camera</button>
+      </a>
+    </div>
+
+    <div class="card c-pink">
+      <div>
+        <div class="icon-wrapper">🎤</div>
+        <h3>Voice Scan</h3>
+        <p>Analyze speech patterns.</p>
+      </div>
+      <button class="btn-action" onclick="window.location.href='voice-analysis.html'">Start Recording</button>
+    </div>
+
+    <div class="card c-blue">
+      <div>
+        <div class="icon-wrapper">🤖</div>
+        <h3>AI Companion</h3>
+        <p>Chat with your digital therapist.</p>
+      </div>
+      <a href="http://127.0.0.1:3000" target="_blank">
+        <button class="btn-action">Start Chat</button>
+      </a>
+    </div>
+
+    <div class="card c-green">
+      <div>
+        <div class="icon-wrapper">🎮</div>
+        <h3>Zen Games</h3>
+        <p>De-stress with quick games.</p>
+      </div>
+      <a href="games.html">
+        <button class="btn-action">Play Now</button>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // --- CONFIG ---
+  let mentalHealthScore = 50; 
+  const treeStates = {
+    withered: "tree-withered1.png",
+    sick: "tree-sick1.png",
+    neutral: "tree-neutral1.png",
+    healthy: "tree-healthy1.png",
+    blooming: "tree-blooming1.png"
+  };
+
+  const hints = [
+    "💡 Hint: A 2-minute breathing exercise can reset your cortisol levels.",
+    "💡 Hint: Try the Chatbot! Journaling your thoughts reduces anxiety.",
+    "💡 Hint: Your tree needs love! Play a Zen Game to boost its health.",
+    "💡 Hint: Voice analysis can detect stress you didn't even notice.",
+    "💡 Hint: Smiling for 10 seconds actually tricks your brain into happiness."
+  ];
+
+  // --- DOM ELEMENTS ---
+  const treeImg = document.getElementById('treeImage');
+  const healthFill = document.getElementById('healthFill');
+  const statusTxt = document.getElementById('gardenStatus');
+  const hintTxt = document.getElementById('randomHint');
+
+  // --- FUNCTIONS ---
+  function updateHint() {
+    hintTxt.innerText = hints[Math.floor(Math.random() * hints.length)];
+  }
+
+  function updateGarden() {
+    // 1. Bar Width
+    healthFill.style.width = mentalHealthScore + "%";
+    
+    // 2. State Logic
+    if (mentalHealthScore <= 20) {
+      treeImg.src = treeStates.withered;
+      statusTxt.innerHTML = "Status: Critical";
+      statusTxt.style.color = "#d63031";
+      treeImg.classList.remove("blooming");
+    } else if (mentalHealthScore <= 40) {
+      treeImg.src = treeStates.sick;
+      statusTxt.innerHTML = "Status: Needs Care";
+      statusTxt.style.color = "#e67e22";
+      treeImg.classList.remove("blooming");
+    } else if (mentalHealthScore <= 60) {
+      treeImg.src = treeStates.neutral;
+      statusTxt.innerHTML = "Status: Stable";
+      statusTxt.style.color = "#636e72";
+      treeImg.classList.remove("blooming");
+    } else if (mentalHealthScore <= 80) {
+      treeImg.src = treeStates.healthy;
+      statusTxt.innerHTML = "Status: Healthy";
+      statusTxt.style.color = "#2ecc71";
+      treeImg.classList.remove("blooming");
+    } else {
+      treeImg.src = treeStates.blooming;
+      statusTxt.innerHTML = "Status: Thriving!";
+      statusTxt.style.color = "#6c5ce7";
+      treeImg.classList.add("blooming");
+    }
+    
+    // 3. New Hint
+    updateHint();
+  }
+
+  // --- DEMO KEYS (Wizard of Oz) ---
+  document.addEventListener('keydown', (e) => {
+    if(e.key.toLowerCase() === 'z') { mentalHealthScore = 10; updateGarden(); } // Kill
+    if(e.key.toLowerCase() === 'm') { mentalHealthScore = 100; updateGarden(); } // Heal
+  });
+
+  // Init
+  updateGarden();
+</script>
+</body>
+</html>
